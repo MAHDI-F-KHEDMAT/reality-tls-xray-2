@@ -2,8 +2,8 @@ name: Automated Xray Config Pipeline
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # اجرای خودکار برنامه در هر ۶ ساعت برای پایداری کانفیگ‌ها
-  workflow_dispatch: # فراهم کردن امکان اجرای دستی از تب Actions در گیت‌هاب
+    - cron: '0 */6 * * *' # اجرای خودکار اسکن هر ۶ ساعت یک‌بار برای مانیتورینگ مستمر پایداری
+  workflow_dispatch: # امکان اجرای آنی و دستی پایپ‌لاین از پنل گیت‌هاب اکشنز
 
 jobs:
   validate-and-optimize:
@@ -20,12 +20,12 @@ jobs:
 
     - name: Install Network Core Component (Xray)
       run: |
-        # دانلود آخرین نسخه رسمی ریلیز شده برای لینوکس ۶۴ بیت
+        # دریافت مستقیم آخرین پکیج پایدار نسخه لینوکس ۶۴ بیت
         wget https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
         unzip Xray-linux-64.zip -d xray-core
         chmod +x xray-core/xray
         mv xray-core/xray ./xray
-        # پاک‌سازی فایل‌های زیپ اضافی برای بهینه‌سازی فضا
+        # پاک‌سازی فایل‌های فشرده مبدا جهت مدیریت بهینه فضای دیسک داکر
         rm -rf xray-core Xray-linux-64.zip
 
     - name: Execute Proxy Analysis Script
@@ -36,6 +36,6 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "GitHub Actions Bot"
         git add best_configs.txt
-        # جلوگیری از ارور ورک‌فلو در صورتی که دیتای جدید با دیتای قبلی تفاوتی نداشته باشد
+        # کنترل خطا در صورتی که دیتای جدید و قدیم یکسان باشند
         git commit -m "Automated Sync: Top 500 validated VLESS nodes updated" || echo "No workflow modifications detected."
         git push

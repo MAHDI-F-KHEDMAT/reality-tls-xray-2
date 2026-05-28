@@ -9,39 +9,87 @@ import time
 import urllib.request
 from urllib.parse import urlparse, parse_qs
 
-# --- پیکربندی‌های اصلی سیستم ---
+# --- لیست منابع اختصاصی شما ---
 SUBSCRIPTION_URLS = [
-    "https://example.com/sub1",  # لینک‌های سابسکریپشن یا منابع خود را اینجا قرار دهید
-    "https://example.com/sub2"
+    "https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/base64/mix",
+    "https://raw.githubusercontent.com/shaoyouvip/free/refs/heads/main/base64.txt",
+    "https://raw.githubusercontent.com/telegeam/freenode/refs/heads/master/v2ray.txt",
+    "https://raw.githubusercontent.com/DukeMehdi/FreeList-V2ray-Configs/refs/heads/main/Configs/VLESS-V2Ray-Configs-By-DukeMehdi.txt",
+    "https://raw.githubusercontent.com/Flikify/Free-Node/refs/heads/main/v2ray.txt",
+    "https://raw.githubusercontent.com/RaitonRed/ConfigsHub/refs/heads/main/Splitted-By-Protocol/vless.txt",
+    "https://raw.githubusercontent.com/shuaidaoya/FreeNodes/refs/heads/main/nodes/base64.txt",
+    "https://raw.githubusercontent.com/penhandev/AutoAiVPN/refs/heads/main/allConfigs.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/vless.txt",
+    "https://raw.githubusercontent.com/crackbest/V2ray-Config/refs/heads/main/config.txt",
+    "https://raw.githubusercontent.com/kismetpro/NodeSuber/refs/heads/main/Splitted-By-Protocol/vless.txt",
+    "https://raw.githubusercontent.com/jagger235711/V2rayCollector/refs/heads/main/results/vless.txt",
+    "https://raw.githubusercontent.com/mohamadfg-dev/telegram-v2ray-configs-collector/refs/heads/main/category/vless.txt",
+    "https://raw.githubusercontent.com/SoroushImanian/BlackKnight/refs/heads/main/sub/vless",
+    "https://raw.githubusercontent.com/Matin-RK0/ConfigCollector/refs/heads/main/subscription.txt",
+    "https://raw.githubusercontent.com/Argh73/VpnConfigCollector/refs/heads/main/All_Configs_Sub.txt",
+    "https://raw.githubusercontent.com/3yed-61/configs-collector/refs/heads/main/classified_output/vless.txt",
+    "https://raw.githubusercontent.com/Leon406/SubCrawler/refs/heads/main/sub/share/vless",
+    "https://raw.githubusercontent.com/ircfspace/XraySubRefiner/refs/heads/main/export/soliSpirit/normal",
+    "https://raw.githubusercontent.com/ircfspace/XraySubRefiner/refs/heads/main/export/psgV6/normal",
+    "https://raw.githubusercontent.com/ircfspace/XraySubRefiner/refs/heads/main/export/psgMix/normal",
+    "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector_Py/refs/heads/main/sub/Mix/mix.txt",
+    "https://raw.githubusercontent.com/T3stAcc/V2Ray/refs/heads/main/Splitted-By-Protocol/vless.txt",
+    "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt",
+    "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/refs/heads/main/Config/vless.txt",
+    "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
+    "https://raw.githubusercontent.com/barry-far/V2ray-Config/refs/heads/main/All_Configs_Sub.txt",
+    "https://raw.githubusercontent.com/hamedcode/port-based-v2ray-configs/refs/heads/main/sub/vless.txt",
+    "https://raw.githubusercontent.com/iboxz/free-v2ray-collector/refs/heads/main/main/vless",
+    "https://raw.githubusercontent.com/Epodonios/v2ray-configs/refs/heads/main/Splitted-By-Protocol/vless.txt",
+    "https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/refs/heads/main/vless_configs.txt",
+    "https://raw.githubusercontent.com/Pasimand/v2ray-config-agg/refs/heads/main/config.txt",
+    "https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/vless.html",
+    "https://raw.githubusercontent.com/xyfqzy/free-nodes/refs/heads/main/nodes/vless.txt",
+    "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/14.txt",
+    "https://raw.githubusercontent.com/Awmiroosen/awmirx-v2ray/refs/heads/main/blob/main/v2-sub.txt",
+    "https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/refs/heads/main/Protocols/vless.txt",
+    "https://raw.githubusercontent.com/gfpcom/free-proxy-list/refs/heads/main/list/vless.txt"
 ]
-MAX_PROCESS_LIMIT = 30000  # سقف کانفیگ‌ها برای ورود به مرحله تست اولیه
-FINAL_OUTPUT_COUNT = 500   # تعداد کانفیگ‌های نهایی برای ذخیره در خروجی
-TIMEOUT_TCP = 2.5          # تایم‌اوت تست اولیه TCP (ثانیه)
-TIMEOUT_XRAY = 5.0         # تایم‌اوت تست عمیق پینگ Xray (ثانیه)
-CONCURRENT_TESTS = 30      # تعداد تست‌های همزمان Xray برای جلوگیری از اتلاف وقت
+
+# --- تنظیمات پایپ‌لاین ---
+MAX_PROCESS_LIMIT = 30000  
+FINAL_OUTPUT_COUNT = 500   
+TIMEOUT_TCP = 2.5          
+TIMEOUT_XRAY = 5.0         
+CONCURRENT_TESTS = 35      # تعداد پروسه‌های همزمان تست پینگ Xray
 TEST_URL = "http://cp.cloudflare.com"
 
 def fetch_configs(urls):
-    """جمع‌آوری و رمزگشایی کانفیگ‌ها از لینک‌های سابسکریپشن"""
+    """جمع‌آوری هوشمند و استخراج کانفیگ‌ها از انواع فرمت‌های متنی، Base64 و HTML"""
     raw_configs = []
+    vless_regex = re.compile(r'vless://[^\s"<]+')
+    
     for url in urls:
         try:
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req, timeout=15) as response:
-                content = response.read().decode('utf-8').strip()
-                # بررسی و رمزگشایی در صورت Base64 بودن سابسکریپشن
-                if not content.startswith("vless://") and not content.startswith("vmess://"):
+                content = response.read().decode('utf-8', errors='ignore').strip()
+                
+                # تشخیص و رمزگشایی خودکار در صورت Base64 بودن کل سورس
+                if content and not any(proto in content for proto in ["vless://", "vmess://", "ss://"]):
                     try:
-                        content = base64.b64decode(content).decode('utf-8')
+                        # اصلاح پدینگ بازمانده در Base64
+                        missing_padding = len(content) % 4
+                        if missing_padding:
+                            content += '=' * (4 - missing_padding)
+                        content = base64.b64decode(content).decode('utf-8', errors='ignore')
                     except:
                         pass
-                raw_configs.extend(content.splitlines())
+                
+                # استخراج دقیق تمام عبارات منطبق با الگوی vless
+                found = vless_regex.findall(content)
+                raw_configs.extend(found)
         except Exception as e:
             print(f"[-] Error fetching from {url}: {e}")
     return raw_configs
 
 def parse_and_filter_vless(configs):
-    """حذف تکراری‌ها و فیلتر دقیق کانفیگ‌های VLESS دارای TLS یا Reality"""
+    """پاک‌سازی، حذف تکراری‌ها و فیلتر کردن کانفیگ‌های VLESS بر پایه Reality یا TLS"""
     unique_configs = list(set(configs))
     valid_configs = []
     
@@ -50,7 +98,6 @@ def parse_and_filter_vless(configs):
         if not conf.startswith("vless://"):
             continue
         try:
-            # جداسازی اجزای اصلی کانفیگ برای بررسی شرایط امنیتی
             content = conf[8:]
             if "#" in content:
                 content, _ = content.split("#", 1)
@@ -63,12 +110,10 @@ def parse_and_filter_vless(configs):
             security = query.get('security', [''])[0].lower()
             
             if security in ['tls', 'reality']:
-                # استخراج آی‌پی و پورت جهت تست TCP
                 host_port = rest.split("?", 1)[0]
                 host = host_port.split(":")[0]
                 port = int(host_port.split(":")[1]) if ":" in host_port else 443
                 
-                # پارس کردن پارامترها برای ساخت فایل کانفیگ Xray
                 params = {k: v[0] for k, v in query.items()}
                 uuid = conf[8:].split("@")[0]
                 
@@ -85,7 +130,7 @@ def parse_and_filter_vless(configs):
     return valid_configs[:MAX_PROCESS_LIMIT]
 
 async def tcp_ping(host, port):
-    """تست سریع زنده بودن آی‌پی و پورت اَست قبل از تست سنگین Xray"""
+    """تست سریع در سطح لایه انتقال (TCP)"""
     try:
         reader, writer = await asyncio.wait_for(
             asyncio.open_connection(host, port), 
@@ -98,7 +143,7 @@ async def tcp_ping(host, port):
         return False
 
 async def filter_live_hosts(parsed_configs):
-    """اجرای دسته‌ای تست TCP روی تمامی کانفیگ‌های فیلتر شده"""
+    """اجرای دسته‌ای و ناهمگام تست زنده بودن TCP فرستنده‌ها"""
     live_configs = []
     
     async def check(item):
@@ -113,7 +158,7 @@ async def filter_live_hosts(parsed_configs):
     return live_configs
 
 def generate_xray_outbound(item):
-    """ساخت دیکشنری استاندارد Outbound ساختار Xray بر اساس پارامترهای کانفیگ"""
+    """نگاشت مشخصات سورس به ساختار استاندارد Outbound در معماری هسته Xray"""
     p = item['params']
     security = p.get('security', 'none')
     network = p.get('type', 'tcp')
@@ -164,12 +209,11 @@ def generate_xray_outbound(item):
     return outbound
 
 async def test_xray_latency(item, port_index, semaphore):
-    """اجرای مستقیم هسته Xray روی پورت اختصاصی محلی و سنجش سرعت واقعی لیتنسی با Curl"""
+    """تست عمیق پینگ از طریق ایجاد تونل‌های موقت Xray کور با پورت مجزا"""
     async with semaphore:
-        local_socks_port = 10800 + port_index
+        local_socks_port = 11000 + port_index
         config_filename = f"config_temp_{local_socks_port}.json"
         
-        # ساختاربندی کل سیستم لوکال برای این کانفیگ خاص
         xray_main_config = {
             "log": {"loglevel": "none"},
             "inbounds": [{
@@ -187,12 +231,11 @@ async def test_xray_latency(item, port_index, semaphore):
         proc = None
         latency = float('inf')
         try:
-            # اجرای غیرمسدودکننده فرآیند Xray
             proc = await asyncio.create_subprocess_exec(
                 "./xray", "-c", config_filename,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
-            await asyncio.sleep(0.4) # زمان کوتاه برای باز شدن پورت توسط هسته
+            await asyncio.sleep(0.35) 
             
             start_time = time.time()
             curl_proc = await asyncio.create_subprocess_exec(
@@ -225,22 +268,21 @@ async def test_xray_latency(item, port_index, semaphore):
         return None
 
 async def main_pipeline():
-    print("[+] Step 1: Fetching raw configs from subscriptions...")
+    print("[+] Step 1: Querying data from subscription URLs...")
     raw_list = fetch_configs(SUBSCRIPTION_URLS)
-    print(f"[+] Total raw configs crawled: {len(raw_list)}")
+    print(f"[+] Total raw nodes collected: {len(raw_list)}")
     
-    print("[+] Step 2: Filtering VLESS (Reality/TLS) & removing duplicates...")
+    print("[+] Step 2: Running deduplication & Reality/TLS targeted filtering...")
     parsed_configs = parse_and_filter_vless(raw_list)
-    print(f"[+] Cleaned & targeted configurations to scan: {len(parsed_configs)}")
+    print(f"[+] Total filtered configurations for verification: {len(parsed_configs)}")
     
-    print("[+] Step 3: Running fast TCP health check...")
+    print("[+] Step 3: Dispatching asynchronous TCP connection test...")
     alive_targets = await filter_live_hosts(parsed_configs)
-    print(f"[+] Passed TCP stage (live nodes): {len(alive_targets)}")
+    print(f"[+] Nodes passed TCP health-check: {len(alive_targets)}")
     
-    print("[+] Step 4: Running high-concurrency Xray speed test...")
+    print("[+] Step 4: Initializing core Xray latency tests...")
     semaphore = asyncio.Semaphore(CONCURRENT_TESTS)
     
-    # مدیریت پورت‌های لوکال به وسیله صف جهت جلوگیری از تداخل فرآیندها
     port_pool = asyncio.Queue()
     for idx in range(CONCURRENT_TESTS):
         await port_pool.put(idx)
@@ -254,21 +296,18 @@ async def main_pipeline():
     tasks = [worker(item) for item in alive_targets]
     test_results = await asyncio.gather(*tasks)
     
-    # فیلتر موارد موفق و مرتب‌سازی بر اساس پینگ کمتر
     successful_tests = [r for r in test_results if r is not None]
     successful_tests.sort(key=lambda x: x['ping'])
+    print(f"[+] Speed evaluation complete. Total responsive nodes: {len(successful_tests)}")
     
-    print(f"[+] Sorting completed. Total validated premium nodes: {len(successful_tests)}")
-    
-    # انتخاب ۵00 تای برتر و ذخیره نهایی
     top_nodes = successful_tests[:FINAL_OUTPUT_COUNT]
     
-    print(f"[+] Saving top {len(top_nodes)} speed-tested configs to output file...")
+    print(f"[+] Committing top {len(top_nodes)} speed-tested configurations to file...")
     with open("best_configs.txt", "w") as f:
         for node in top_nodes:
             f.write(node['config'] + "\n")
             
-    print("[+] Pipeline processed successfully. Output file 'best_configs.txt' updated.")
+    print("[+] Architecture flow executed successfully. 'best_configs.txt' is ready.")
 
 if __name__ == "__main__":
     asyncio.run(main_pipeline())

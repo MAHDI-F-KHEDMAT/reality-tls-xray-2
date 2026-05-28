@@ -1,0 +1,41 @@
+name: Automated Xray Config Pipeline
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # اجرای خودکار برنامه در هر ۶ ساعت برای پایداری کانفیگ‌ها
+  workflow_dispatch: # فراهم کردن امکان اجرای دستی از تب Actions در گیت‌هاب
+
+jobs:
+  validate-and-optimize:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository Code
+      uses: actions/checkout@v4
+
+    - name: Initialize Python Environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Network Core Component (Xray)
+      run: |
+        # دانلود آخرین نسخه رسمی ریلیز شده برای لینوکس ۶۴ بیت
+        wget https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+        unzip Xray-linux-64.zip -d xray-core
+        chmod +x xray-core/xray
+        mv xray-core/xray ./xray
+        # پاک‌سازی فایل‌های زیپ اضافی برای بهینه‌سازی فضا
+        rm -rf xray-core Xray-linux-64.zip
+
+    - name: Execute Proxy Analysis Script
+      run: python proxy_pipeline.py
+
+    - name: Publish and Commit Optimized Output
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "GitHub Actions Bot"
+        git add best_configs.txt
+        # جلوگیری از ارور ورک‌فلو در صورتی که دیتای جدید با دیتای قبلی تفاوتی نداشته باشد
+        git commit -m "Automated Sync: Top 500 validated VLESS nodes updated" || echo "No workflow modifications detected."
+        git push
